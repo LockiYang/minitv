@@ -1,22 +1,12 @@
-<div align="center">
 
-<h1>MiniTV</h1>
 
-<p><strong>开源的短剧分发平台</strong> —— 内容方入驻上传、平台审核分发、分集解锁与结算，一套后端撑起官网 / H5 / App / 后台。</p>
+# MiniTV
 
-<p>React 18 · TypeScript · FastAPI · PostgreSQL · Redis · Flutter · Bunny Stream · Stripe</p>
+**开源的短剧分发平台** —— 内容方入驻上传、平台审核分发、分集解锁与结算，一套后端撑起官网 / H5 / App / 后台。
 
-</div>
+React 18 · TypeScript · FastAPI · PostgreSQL · Redis · Flutter · Bunny Stream · Stripe
 
----
 
-> **本仓库已冻结（2026-11-05）**
->
-> 这里保留 v1.0.0 的完整代码与提交历史，作为公开快照。后续迭代已转入私有仓库，本仓库不再更新，也不再合并 PR。
->
-> 线上服务仍在运行：[官网](https://minitv.us) · [H5](https://h5.minitv.us) · [API](https://api.minitv.us)
-
----
 
 ## 在线演示
 
@@ -28,47 +18,6 @@
 | ⚙️ API | <https://api.minitv.us> | 接口服务，文档见 `/docs` |
 
 > 演示站由维护者提供，仅用于体验产品；请勿用于压测或爬取。
-
-## 产品演示
-
-<table>
-<tr>
-<td width="100%">
-<img src="docs/screenshots/web-home.png" alt="MiniTV 官网首屏">
-<br><sub><b>官网</b> —— 首屏讲清价值主张，右侧真机模型预演产品界面，主 CTA 直达免费试看。</sub>
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td width="33%" align="center">
-<img src="docs/screenshots/h5-home.jpg" alt="H5 首页">
-<br><sub><b>H5 · 首页</b><br>Discover / Ranking / Free 多频道，主推位轮播</sub>
-</td>
-<td width="33%" align="center">
-<img src="docs/screenshots/h5-shows.jpg" alt="H5 频道页">
-<br><sub><b>H5 · 新剧</b><br>最新上架一屏尽览，三列纵向浏览</sub>
-</td>
-<td width="33%" align="center">
-<img src="docs/screenshots/app-episodes.jpg" alt="App 选集面板">
-<br><sub><b>App · 选集</b><br>已看 / 在追 / 加锁三态一目了然</sub>
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td width="50%">
-<img src="docs/screenshots/admin-dashboard.png" alt="后台数据看板">
-<br><sub><b>后台 · 数据看板</b> —— 活跃、播放、完播、营收按日聚合，全站累计与待办一屏掌握。</sub>
-</td>
-<td width="50%">
-<img src="docs/screenshots/admin-rewards.png" alt="后台金币与任务">
-<br><sub><b>后台 · 金币与任务</b> —— 7 天签到阶梯与任务激励可在线上直接调参，次日生效、全程留痕。</sub>
-</td>
-</tr>
-</table>
 
 ## 功能
 
@@ -146,10 +95,14 @@ cp .env.example .env
 
 `.env.example` 默认 `BUNNY_MODE=fake`，播放与封面走本地桩实现 —— **不填任何外部密钥也能把接口和后台跑通**。
 
-### 2. 起依赖服务
+### 2. 起依赖服务或安装数据库
 
 ```bash
 docker compose up -d      # PostgreSQL :15432 / Redis :16379
+```
+```sql
+CREATE USER minitv WITH LOGIN PASSWORD 'minitv_local';
+CREATE DATABASE minitv OWNER minitv;
 ```
 
 ### 3. 装后端依赖并建表
@@ -275,18 +228,3 @@ python3 scripts/release.py run  --target server -- ./scripts/deploy_server.sh
 | [`docs/supplier-role-plan.md`](docs/supplier-role-plan.md) | 上剧方角色的权限与结算设计 |
 | [`docs/cli-reference.md`](docs/cli-reference.md) | CLI 全部命令 |
 
-## 交流与反馈
-
-部署踩坑、功能建议、想聊聊短剧出海怎么做，都欢迎。
-
-<p align="center"><img src="docs/assets/wechat.png" width="260" alt="扫码加微信，备注 MiniTV 进交流群"></p>
-
-<p align="center"><strong>扫码加微信，备注「MiniTV」，拉你进交流群</strong></p>
-
-遇到 Bug 也可以直接开 [Issue](https://github.com/xuliang2024/minitv/issues)。
-
-## 许可证
-
-本项目基于 [MIT License](LICENSE) 开源，© 2026 MiniTV。
-
-可自由用于商业项目，保留版权声明即可。如需改为 Apache-2.0（附带专利授权条款），替换 `LICENSE` 文件并同步本节即可。

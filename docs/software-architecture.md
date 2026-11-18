@@ -5,7 +5,7 @@
 技术约束：美国区服务器、FastAPI、Bunny Storage / Stream / CDN、Cloudflare R2 前端静态托管  
 读者：客户端、后端、管理后台、测试  
 依据：App 设计稿 file `735952778351359`，官网与管理后台设计稿 file `735989669924027`  
-配套文档：[技术架构](technical-architecture.md)、[前后端开发文档](../output/minitv-devdoc-20261013/stage3/MiniTV%20前后端开发文档.docx)
+配套文档：[技术架构](technical-architecture.md)、[前后端开发文档](minitv-devdoc-20261013/stage3/MiniTV%20前后端开发文档.docx)
 
 ## 1. 架构目标
 

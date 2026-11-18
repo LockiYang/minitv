@@ -11,7 +11,7 @@
 |---|---|
 | [软件架构设计](software-architecture.md) | 模块边界、状态机、一致性、安全 |
 | [技术架构](technical-architecture.md) | 运行时、Bunny、R2、密钥和发布 |
-| [前后端开发文档](../output/minitv-devdoc-20261013/stage1/final_draft.md) | 页面、字段、12 条验收清单 |
+| [前后端开发文档](minitv-devdoc-20261013/stage1/final_draft.md) | 页面、字段、12 条验收清单 |
 | App 设计稿 file `735952778351359` | 客户端 19 屏，360pt |
 | 官网与管理后台设计稿 file `735989669924027` | 官网单页；后台 1440×900，现行 16 屏 |
 | `LiteTV 短剧 App 设计稿.pptx` | 早期中文视觉参考，不是界面验收基准 |
