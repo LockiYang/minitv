@@ -109,6 +109,7 @@
 ```
 .
 ├── backend/            FastAPI 服务
+│   ├── app/api_router.py  汇总 C 端、管理后台和上剧方路由
 │   ├── app/modules/    业务模块：account / content / playback / wallet /
 │   │                   billing / social / ops / recommend / analytics
 │   ├── alembic/        数据库迁移
@@ -123,6 +124,8 @@
 ├── deployments/        发布记录（每次发布自动生成 JSON）
 └── docker-compose.yml  本地 PostgreSQL + Redis
 ```
+
+后端路由随业务模块维护。C 端接口放在 `client_router.py`，管理后台接口放在 `admin_router.py` 或按职责命名的路由文件中，第三方回调放在 `webhook_router.py`。`app/api_router.py` 统一注册 `/v1`、`/admin/v1` 和 `/partner/v1`。Pydantic 请求和响应模型放在模块的 `schemas.py` 或对应的专用 schema 文件中。
 
 ## 快速开始
 

@@ -1,10 +1,4 @@
-"""Supplier review queue: /admin/v1/reviews.
-
-Approve/reject moves only `dramas.review_state`; publishing stays a separate
-action because the plan deliberately keeps "approved" and "live" apart. Every
-write is a conditional UPDATE on `review_state = 'pending'`, so two operators
-clicking at the same time cannot double-review a drama.
-"""
+"""Editorial review and publishing of supplier submissions."""
 
 from __future__ import annotations
 
@@ -13,7 +7,6 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
@@ -21,32 +14,24 @@ from app.db import get_db
 from app.modules.account import mail
 from app.modules.common.models import AuditLog
 from app.modules.content.models import Drama, Episode
+from app.modules.content.schemas import BatchIn, DecisionIn
 from app.modules.content.service import InvalidTransition, transition_drama, transition_episode
-from app.modules.ops.models import ROLE_ADMIN, ROLE_OPS, AdminUser, Supplier
-from app.modules.ops.router import require_admin
+from app.modules.ops.auth import require_admin
+from app.modules.ops.models import AdminUser, ROLE_ADMIN, ROLE_OPS, Supplier
 
-router = APIRouter(prefix="/admin/v1", tags=["reviews"])
+router = APIRouter(tags=["reviews"])
+
+
 log = logging.getLogger(__name__)
 
+
 REVIEW_WRITERS = (ROLE_OPS, ROLE_ADMIN)
-MAX_BATCH = 50
 
 
 def _require_reviewer(user: AdminUser = Depends(require_admin)) -> AdminUser:
     if user.role not in REVIEW_WRITERS:
         raise HTTPException(status_code=403, detail="role cannot review content")
     return user
-
-
-class DecisionIn(BaseModel):
-    decision: str = Field(pattern="^(approve|reject)$")
-    note: str = Field(default="", max_length=500)
-
-
-class BatchIn(BaseModel):
-    drama_ids: list[int] = Field(min_length=1, max_length=MAX_BATCH)
-    decision: str = Field(pattern="^(approve|reject)$")
-    note: str = Field(default="", max_length=500)
 
 
 def _iso(value) -> str | None:

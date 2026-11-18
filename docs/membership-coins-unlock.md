@@ -221,11 +221,11 @@ allowed  = free || member || unlocked
 | 逻辑 | 文件:行 |
 |---|---|
 | 解锁判定（free / member / unlocked） | `backend/app/modules/playback/service.py:126-160` |
-| 会员有效期 `access_until` | `backend/app/modules/billing/service.py:142-158` |
-| 会员状态展示 `active_membership` | `backend/app/modules/billing/service.py:194-240` |
+| 会员有效期 `access_until` | `backend/app/modules/billing/membership.py` |
+| 会员状态展示 `active_membership` | `backend/app/modules/billing/membership.py` |
 | 金币解锁事务 | `backend/app/modules/wallet/service.py:55-131` |
-| 解锁接口 | `backend/app/modules/public_flow.py:164-175` |
-| 播放页锁定标记 | `backend/app/modules/public_flow.py:821-976` |
+| 解锁接口 `unlock` | `backend/app/modules/wallet/client_router.py` |
+| 播放页锁定标记 `drama_play` | `backend/app/modules/playback/client_router.py` |
 | 签到 / 广告 / 绑定奖励 | `backend/app/modules/account/service.py:378-409, 510-525` |
 | 每日任务进度与领取 | `backend/app/modules/account/tasks.py:48-203` |
 | 任务与金额目录 | `backend/app/modules/account/service.py:43-115` |

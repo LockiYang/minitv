@@ -1,9 +1,4 @@
-"""GET /v1/feed - the For-You vertical feed.
-
-Kept thin on purpose: everything that decides *what* to show lives in
-:mod:`app.modules.recommend.service` so the ranking can be exercised without
-going through HTTP.
-"""
+"""Client For You recommendation feed."""
 
 from __future__ import annotations
 
@@ -11,12 +6,12 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+from app.modules.account.auth import optional_user
 from app.modules.account.models import User
-from app.modules.common.auth import optional_user
 
 from . import config, service
 
-router = APIRouter(prefix="/v1", tags=["feed"])
+router = APIRouter(tags=["feed"])
 
 
 @router.get("/feed")

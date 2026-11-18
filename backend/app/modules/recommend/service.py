@@ -30,9 +30,9 @@ from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.modules.common.redis_client import get_redis
 from app.modules.content import service as content
 from app.modules.content.models import Drama, Episode, Tag
-from app.modules.ops.service import get_redis
 from app.modules.social.models import Comment, Reaction
 
 from . import config, ranking, signals

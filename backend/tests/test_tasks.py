@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.modules.account import tasks as task_service
 from app.modules.account.service import LA, AccountError, la_today
-from app.modules.ops.config_models import RewardConfig, TaskClaim
+from app.modules.account.models import RewardConfig, TaskClaim
 from app.modules.playback.models import PlaybackEvent
 from app.modules.social.models import Reaction
 from app.modules.wallet.models import CoinLedgerEntry, WalletAccount

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-import os
 import secrets
 from datetime import datetime, timedelta, timezone
 
@@ -17,13 +16,11 @@ import redis as redis_lib
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db import load_env
+from app.modules.common.redis_client import get_redis
 from app.modules.ops.models import AdminUser
 
 SESSION_PREFIX = "minitv_admin_session:"
 SESSION_TTL = timedelta(hours=8)
-
-_redis_client = None
 
 
 class SessionStoreUnavailable(Exception):
@@ -33,20 +30,6 @@ class SessionStoreUnavailable(Exception):
     500 would hide the real cause (usually the local ``minitv-redis``
     container being down).
     """
-
-
-def get_redis():
-    global _redis_client
-    if _redis_client is None:
-        load_env()
-        url = os.environ.get("REDIS_URL", "redis://:minitv_local@127.0.0.1:16379/0")
-        _redis_client = redis_lib.Redis.from_url(url, decode_responses=True)
-    return _redis_client
-
-
-def reset_redis_for_tests() -> None:
-    global _redis_client
-    _redis_client = None
 
 
 # ---- passwords ----

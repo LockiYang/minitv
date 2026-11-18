@@ -75,7 +75,7 @@ GET /v1/auth/providers
 | 文件 | 改动 |
 |---|---|
 | `backend/app/modules/account/service.py` | 新增 `login_or_register_with_code()`：抽出 `_verify_code()`（校验/过期/尝试次数），登录失败于 `email not registered` 时走 `_new_user()`；`issue_code()` 的 purpose 规范化 |
-| `backend/app/modules/public_flow.py` | 新增 `/auth/email/authenticate`、`/auth/providers`；`CodeIn.purpose` 默认改 `login`，加白名单 |
+| `backend/app/modules/account/client_router.py`、`backend/app/modules/account/schemas.py` | 新增 `/auth/email/authenticate`、`/auth/providers`。将 `CodeIn.purpose` 默认改为 `login` 并加白名单。 |
 | `backend/app/modules/account/google.py` | 无需改动；`google_configured()` 已可供 providers 使用 |
 | `deployments/` / 运维 | 服务器 `.env` 补三项；重启服务；`CORS_ORIGINS` 确认含 `https://h5.minitv.us` |
 

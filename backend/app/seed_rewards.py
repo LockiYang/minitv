@@ -28,7 +28,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_engine, make_session_factory
 from app.modules.account.service import REWARD_TASKS, la_today
-from app.modules.ops.config_models import RewardConfig
+from app.modules.account.models import RewardConfig
 
 
 def _latest_effective(db: Session, code: str, today):

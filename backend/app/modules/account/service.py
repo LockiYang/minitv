@@ -18,10 +18,9 @@ from sqlalchemy.orm import Session
 from app.modules.account.facebook import FacebookAuthError, verify as verify_facebook
 from app.modules.account.google import GoogleAuthError, GoogleIdentity, verify_id_token
 from app.modules.account.mail import MailError, send_email
-from app.modules.account.models import ThirdPartyIdentity, User, VerificationCode
+from app.modules.account.models import AdClaim, Checkin, RewardConfig, ThirdPartyIdentity, User, VerificationCode
 from app.modules.common.models import AuditLog
-from app.modules.ops.config_models import AdClaim, Checkin, RewardConfig
-from app.modules.ops.service import get_redis
+from app.modules.common.redis_client import get_redis
 from app.modules.wallet.models import CoinLedgerEntry, WalletAccount
 
 LA = ZoneInfo("America/Los_Angeles")

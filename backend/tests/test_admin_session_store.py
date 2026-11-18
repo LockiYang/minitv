@@ -13,7 +13,7 @@ import redis as redis_lib
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.modules.ops import service as ops_service
+from app.modules.common import redis_client
 
 
 @pytest.fixture()
@@ -40,7 +40,7 @@ class _DownRedis:
 
 
 def _kill_redis(monkeypatch):
-    monkeypatch.setattr(ops_service, "_redis_client", _DownRedis())
+    monkeypatch.setattr(redis_client, "_redis_client", _DownRedis())
 
 
 def test_login_returns_503_when_redis_is_down(monkeypatch, client, make):

@@ -43,4 +43,4 @@
 ## 收尾状态
 
 - dev 库最终保留 5 条当天生效的预设行；验收过程产生的 2 条 pending 行已清理，`audit_logs` 保留完整变更记录（页面"变更记录"可见，操作人=运营示例）。
-- 未提交代码；改动文件：`backend/app/modules/account/service.py`、`backend/app/modules/ops/flow_router.py`、`backend/app/seed_rewards.py`、`backend/tests/test_reward_config_admin.py`、`backend/tests/test_seed_rewards.py`、`admin/src/pages/Rewards.tsx`、`admin/src/App.tsx`、`admin/src/pages/StagePages.tsx`。
+- 验收时改动尚未提交。对应的当前文件为 `backend/app/modules/account/service.py`、`backend/app/modules/account/admin_router.py`、`backend/app/seed_rewards.py`、`backend/tests/test_reward_config_admin.py`、`backend/tests/test_seed_rewards.py`、`admin/src/pages/Rewards.tsx`、`admin/src/App.tsx`、`admin/src/pages/StagePages.tsx`。

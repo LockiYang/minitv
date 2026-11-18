@@ -239,11 +239,11 @@ CREATE INDEX ix_comments_moderation_queue
 | 迁移 | `backend/alembic/versions/e8c1f4a7b203_async_moderation.py` | 4 列 + 部分索引 |
 | 模型 | `backend/app/modules/social/models.py` | 新字段 |
 | worker | `backend/app/modules/social/moderation.py` | `process_comment` / `start_moderation_worker` |
-| 发评论 | `backend/app/modules/public_flow.py` | 先落库 + BackgroundTasks + 可见性查询 |
+| 发评论 | `backend/app/modules/social/client_router.py` | 先落库 + BackgroundTasks + 可见性查询 |
 | 启动 | `backend/app/main.py` | 启动 sweeper |
-| 人工审核 | `backend/app/modules/ops/flow_router.py` | 置 `canceled` |
+| 人工审核 | `backend/app/modules/social/admin_router.py` | 置 `canceled` |
 | H5 | `CommentSheet.tsx` / `types.ts` | 即时插入 + 计数同步，不渲染 pending |
-| 计数 | `public_flow.py` / `recommend/service.py` | approved + viewer 自己的 pending |
+| 计数 | `social/client_router.py` / `recommend/service.py` | approved + viewer 自己的 pending |
 | 测试 | `backend/tests/test_comments.py` | 新增异步用例 |
 
 
@@ -262,10 +262,10 @@ CREATE INDEX ix_comments_moderation_queue
 实现文件：
 
 - `backend/app/modules/social/moderation.py`：`queue_state` / `process_comment` / `process_pending_batch` / `start_moderation_worker`
-- `backend/app/modules/public_flow.py`：先落库 + `BackgroundTasks`、按 viewer 的可见性与计数
+- `backend/app/modules/social/client_router.py` 负责先落库、启动 `BackgroundTasks`，以及按 viewer 查询可见性和计数。
 - `backend/app/modules/recommend/service.py`：Feed 计数加本人 pending
 - `backend/app/main.py`：启动 sweeper（测试用 `MODERATION_WORKER=0` 关闭）
-- `backend/app/modules/ops/flow_router.py`：人工处理置 `canceled`
+- `backend/app/modules/social/admin_router.py` 在人工处理时将状态置为 `canceled`。
 - `h5/src/ui/CommentSheet.tsx`：即时插入、无标签无 toast、计数用响应 `total`
 
 测试：`backend/tests/test_comments_async.py` 8 条，全量 268 passed。

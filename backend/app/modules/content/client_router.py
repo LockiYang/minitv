@@ -1,15 +1,4 @@
-"""Public content router: /v1 - the only client-facing read surface.
-
-Everything goes through content.service's published-only read path; draft,
-in-review and unpublished dramas are structurally invisible here.
-
-The ``/v1/preview`` surface powers the website's free-preview player: it
-lists, per category, the first few dramas that have at least one published
-episode (the "public data"), and returns the published episode list with a
-``free`` flag. Locked episodes never carry playback material on any public
-endpoint - only ``POST /v1/playback`` mints a signed URL, and only for free
-episodes when the caller is a guest.
-"""
+"""Published catalog, home groups and web previews."""
 
 from __future__ import annotations
 
@@ -20,8 +9,10 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.modules.content import service as content
 from app.modules.content.models import Drama, Episode, Tag
+from app.modules.ops.config_models import Banner
 
-router = APIRouter(prefix="/v1", tags=["public"])
+router = APIRouter()
+
 
 # "每个分类的前 7 个" - the website preview shows at most this many dramas per
 # category; everything beyond that cap is app-only.
@@ -109,7 +100,7 @@ def _preview_drama_out(drama: Drama, counters: dict, tags: list[Tag]) -> dict:
     }
 
 
-@router.get("/preview")
+@router.get("/preview", tags=["public"])
 def preview_catalog(db: Session = Depends(get_db)):
     """Website trial surface: first N dramas per category, public data only.
 
@@ -161,7 +152,7 @@ def preview_catalog(db: Session = Depends(get_db)):
     return {"limit": PREVIEW_LIMIT, "categories": categories}
 
 
-@router.get("/preview/dramas/{drama_id}")
+@router.get("/preview/dramas/{drama_id}", tags=["public"])
 def preview_drama(drama_id: int, db: Session = Depends(get_db)):
     """Preview detail for one drama: metadata plus the published episode list.
 
@@ -202,13 +193,13 @@ def preview_drama(drama_id: int, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/home")
+@router.get("/home", tags=["public"])
 def home(db: Session = Depends(get_db)):
     dramas = content.list_published_dramas(db)
     return {"items": [_drama_out(d) for d in dramas]}
 
 
-@router.get("/dramas/{drama_id}")
+@router.get("/dramas/{drama_id}", tags=["public"])
 def drama_detail(drama_id: int, db: Session = Depends(get_db)):
     drama = content.get_published_drama(db, drama_id)
     if drama is None:
@@ -216,7 +207,57 @@ def drama_detail(drama_id: int, db: Session = Depends(get_db)):
     return _drama_out(drama)
 
 
-@router.get("/search")
+@router.get("/search", tags=["public"])
 def search(q: str = Query(min_length=1), db: Session = Depends(get_db)):
     dramas = content.search_published_dramas(db, q)
     return {"items": [_drama_out(d) for d in dramas]}
+
+
+@router.get("/home/groups", tags=["public-flow"])
+def home_groups(db: Session = Depends(get_db)):
+    from app.modules.content.models import DramaHomeGroup, HomeGroup
+    groups = db.scalars(select(HomeGroup).where(HomeGroup.status == "active").order_by(HomeGroup.position)).all()
+    payload = []
+    for group in groups:
+        links = db.scalars(
+            select(DramaHomeGroup).where(DramaHomeGroup.group_id == group.id).order_by(DramaHomeGroup.position_in_group)
+        ).all()
+        dramas = []
+        for link in links:
+            drama = content.get_published_drama(db, link.drama_id)
+            if drama is not None:
+                dramas.append(
+                    {
+                        "id": drama.id,
+                        "title": drama.title,
+                        "cover_url": drama.cover_url,
+                        "position": link.position_in_group,
+                        "play_count": drama.play_count,
+                    }
+                )
+        payload.append(
+            {
+                "id": group.id,
+                "name": group.name,
+                "position": group.position,
+                "style": group.style,
+                "badge": group.badge,
+                "dramas": dramas,
+            }
+        )
+    banners = db.scalars(select(Banner).where(Banner.status == "online").order_by(Banner.position)).all()
+    banner_payload = []
+    for banner in banners:
+        drama = content.get_published_drama(db, banner.drama_id) if banner.drama_id else None
+        banner_payload.append(
+            {
+                "id": banner.id,
+                "drama_id": banner.drama_id,
+                "slot": banner.slot,
+                "title": None if drama is None else drama.title,
+                "cover_url": None if drama is None else drama.cover_url,
+                "kicker": banner.kicker,
+                "headline": banner.headline or ("" if drama is None else drama.title),
+            }
+        )
+    return {"groups": payload, "banners": banner_payload}

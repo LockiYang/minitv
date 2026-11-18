@@ -85,10 +85,10 @@ def session(engine):
     table_names = ", ".join(f'"{t.name}"' for t in Base.metadata.sorted_tables)
     with engine.begin() as conn:
         conn.execute(text(f"TRUNCATE TABLE {table_names} RESTART IDENTITY CASCADE"))
-    from app.modules.ops import service as ops_service
+    from app.modules.common import redis_client
 
-    ops_service.reset_redis_for_tests()
-    ops_service.get_redis().flushdb()  # db 15 is dedicated to tests
+    redis_client.reset_redis_for_tests()
+    redis_client.get_redis().flushdb()  # use only the dedicated test database
     factory = sessionmaker(bind=engine, expire_on_commit=False)
     s = factory()
     try:

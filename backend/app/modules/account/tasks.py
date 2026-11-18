@@ -19,7 +19,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.modules.account.models import User
+from app.modules.account.models import Checkin, RewardConfig, TaskClaim, User
 from app.modules.account.service import (
     DEFAULT_CHECKIN,
     LA,
@@ -30,7 +30,6 @@ from app.modules.account.service import (
     _credit,
     la_today,
 )
-from app.modules.ops.config_models import Checkin, RewardConfig, TaskClaim
 from app.modules.playback.models import PlaybackEvent
 from app.modules.social.models import Reaction
 from app.modules.wallet.models import WalletAccount

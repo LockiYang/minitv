@@ -60,7 +60,7 @@ op.create_check_constraint("ck_admin_users_status", "admin_users", "status IN ('
 
 ## 5. 接口设计
 
-权限：**全部 `require_admin_role`**（仅 `admin`，`flow_router.py:273`）。`GET /staff` 也仅 admin —— 员工名册不该对运营/财务开放。只读的「我是谁」仍走已有的 `/auth/me`。
+权限：**全部 `require_admin_role`**（仅 `admin`，定义在 `backend/app/modules/ops/auth.py`）。`GET /staff` 也仅 admin —— 员工名册不该对运营/财务开放。只读的「我是谁」仍走已有的 `/auth/me`。
 
 ### 5.1 列表
 
@@ -164,7 +164,7 @@ db.add(AuditLog(actor_type="admin", actor_id=actor.id, action="staff_disable",
                 target_type="admin_user", target_id=row.id, payload={"reason": reason}))
 ```
 
-**必须在同一个事务里**与业务改动一起提交（现有 `flow_router` 的调账/改价都是这个写法）。
+**必须在同一个事务里**与业务改动一起提交（参考 `backend/app/modules/wallet/admin_router.py` 的调账和 `backend/app/modules/billing/service.py` 的改价）。
 
 ## 6. 前端设计
 

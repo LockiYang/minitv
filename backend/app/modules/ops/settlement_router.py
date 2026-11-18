@@ -5,17 +5,17 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.modules.common.models import AuditLog
 from app.modules.ops import settlements as service
+from app.modules.ops.auth import require_admin
 from app.modules.ops.models import ROLE_ADMIN, ROLE_FINANCE, AdminUser, Supplier, SupplierSettlement
-from app.modules.ops.router import require_admin
+from app.modules.ops.schemas import GenerateIn, StatusIn
 
-router = APIRouter(prefix="/admin/v1", tags=["settlements"])
+router = APIRouter(tags=["settlements"])
 MONEY_ROLES = (ROLE_FINANCE, ROLE_ADMIN)
 
 
@@ -23,15 +23,6 @@ def _require_money(user: AdminUser = Depends(require_admin)) -> AdminUser:
     if user.role not in MONEY_ROLES:
         raise HTTPException(status_code=403, detail="role cannot access settlements")
     return user
-
-
-class GenerateIn(BaseModel):
-    month: str = Field(pattern=r"^\d{4}-\d{2}$")
-
-
-class StatusIn(BaseModel):
-    status: str = Field(pattern="^(confirmed|paid)$")
-    note: str = Field(default="", max_length=500)
 
 
 def _out(row: SupplierSettlement, supplier: Supplier | None) -> dict:

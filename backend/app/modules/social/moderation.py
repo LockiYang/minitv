@@ -28,8 +28,7 @@ from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.db import get_engine, make_session_factory
-from app.modules.ops.config_models import ModerationSettings
-from app.modules.social.models import Comment
+from app.modules.social.models import Comment, ModerationSettings
 
 logger = logging.getLogger(__name__)
 

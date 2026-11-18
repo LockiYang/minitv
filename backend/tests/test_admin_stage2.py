@@ -386,9 +386,9 @@ def test_cover_upload_replace_and_delete(make, session, client, monkeypatch):
     )
     assert r.status_code == 422
 
-    import app.modules.ops.flow_router as flow
+    from app.modules.content import media_admin_router
 
-    monkeypatch.setattr(flow, "COVER_MAX_BYTES", 8)
+    monkeypatch.setattr(media_admin_router, "COVER_MAX_BYTES", 8)
     r = client.post(
         f"/admin/v1/dramas/{drama_id}/cover",
         files={"file": ("big.jpg", JPEG + b"x" * 32, "image/jpeg")},
@@ -400,7 +400,7 @@ def test_cover_upload_replace_and_delete(make, session, client, monkeypatch):
     from app.modules.common import bunny
 
     # The size-limit override above must not leak into the upstream-failure case.
-    monkeypatch.setattr(flow, "COVER_MAX_BYTES", 5 * 1024 * 1024)
+    monkeypatch.setattr(media_admin_router, "COVER_MAX_BYTES", 5 * 1024 * 1024)
 
     def boom(*_a, **_k):
         raise bunny.BunnyError("upstream down")

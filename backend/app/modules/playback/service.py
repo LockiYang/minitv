@@ -17,8 +17,8 @@ from sqlalchemy.orm import Session
 
 from app.modules.billing import service as billing
 from app.modules.common import bunny
+from app.modules.common.redis_client import get_redis
 from app.modules.content.models import Drama, Episode
-from app.modules.ops.service import get_redis
 from app.modules.playback.models import PlaybackEvent, PlaybackProgress
 from app.modules.wallet.models import ENTITLEMENT_TYPE_COIN, Entitlement
 

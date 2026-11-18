@@ -2,9 +2,6 @@
 
 Importing this package registers every ORM model on the shared declarative
 base so Alembic autogenerate and create_all see the full metadata.
-Stage 1 implements account / content / wallet / billing models plus shared
-infrastructure tables; playback has no persistent tables yet and social /
-ops / analytics stay as empty packages by design.
 """
 
 from app.modules.account import models as _account_models  # noqa: F401

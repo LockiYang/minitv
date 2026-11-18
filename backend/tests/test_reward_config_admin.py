@@ -11,7 +11,7 @@ from sqlalchemy import func, select
 from app.main import app
 from app.modules.account import service as accounts
 from app.modules.common.models import AuditLog
-from app.modules.ops.config_models import RewardConfig
+from app.modules.account.models import RewardConfig
 
 
 @pytest.fixture()

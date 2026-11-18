@@ -198,17 +198,17 @@
 
 | 域 | 文件 |
 |---|---|
-| 路由装配 | `backend/app/main.py` |
-| C 端主接口 | `backend/app/modules/public_flow.py` |
-| 内容公开读 | `backend/app/modules/content/public_router.py` |
+| 路由装配 | `backend/app/api_router.py`，由 `backend/app/main.py` 注册 |
+| C 端主接口 | 各业务模块的 `client_router.py` |
+| 内容公开读 | `backend/app/modules/content/client_router.py` |
 | 状态机 | `backend/app/modules/content/service.py` |
 | 播放鉴权 | `backend/app/modules/playback/service.py` |
-| 推荐 | `backend/app/modules/recommend/{router,service,ranking,signals,config}.py` |
+| 推荐 | `backend/app/modules/recommend/{client_router,service,ranking,signals,config}.py` |
 | 金币/解锁 | `backend/app/modules/wallet/service.py` |
 | 账号/奖励 | `backend/app/modules/account/{service,tasks}.py` |
 | 会员/支付 | `backend/app/modules/billing/service.py` |
 | 评论审核 | `backend/app/modules/social/moderation.py` |
-| 后台接口 | `backend/app/modules/ops/{router,flow_router}.py` |
+| 后台接口 | 各业务模块的 `admin_router.py` 等，后台账号与运营配置入口在 `backend/app/modules/ops/` |
 | 看板 | `backend/app/modules/analytics/service.py` |
 | H5 | `h5/src/App.tsx` + `h5/src/pages/*` |
 | 官网 | `web/src/{App,preview,watch}.tsx` |

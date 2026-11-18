@@ -255,7 +255,7 @@ POST /v1/billing/checkout
 { "plan_code": "monthly", "source_drama_id": 123 }   # 可选，H5 从剧集/播放页打开时带
 ```
 
-- `public_flow.CheckoutIn` 加字段；`create_checkout_session(source_drama_id=...)`；
+- `backend/app/modules/billing/schemas.py` 的 `CheckoutIn` 加字段；`create_checkout_session(source_drama_id=...)`；
 - Stripe metadata 写 `source_drama_id`（一次性放 `payment_intent_data`，订阅放 `subscription_data`）；
 - 落库：checkout 创建的 `Order` 直接带；webhook 补单时从 metadata 读；订阅续费订单继承 `subscriptions.source_drama_id`。
 

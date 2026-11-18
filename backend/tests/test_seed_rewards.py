@@ -7,7 +7,7 @@ from datetime import timedelta
 from sqlalchemy import func, select
 
 from app.modules.account.service import REWARD_TASKS, la_today
-from app.modules.ops.config_models import RewardConfig
+from app.modules.account.models import RewardConfig
 from app.seed_rewards import seed_rewards
 
 

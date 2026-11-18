@@ -5,14 +5,14 @@
 
 ## 0. 一句话结论
 
-后台「用户管理」现在**只能看会员、不能改**（`flow_router.py` 只有列表 / 改资料 / 调金币三个用户接口），客服补偿、测试号开通、误购收回都只能进 Stripe 后台或直接改库。本方案补 **3 个接口 + 1 个弹窗**，顺手修掉列表上已经能看见的一个读数错误。
+本方案实施前，后台「用户管理」**只能看会员、不能改**（用户接口只有列表 / 改资料 / 调金币），客服补偿、测试号开通、误购收回都只能进 Stripe 后台或直接改库。本方案补 **3 个接口 + 1 个弹窗**，顺手修掉列表上已经能看见的一个读数错误。
 
 ## 1. 现状问题
 
 | # | 问题 | 位置 | 影响 |
 |---|---|---|---|
-| 1 | 没有任何会员写接口 | `ops/flow_router.py:1755`(list) / `:1793`(patch) / `:1859`(coins) | 客服无法补偿会员，只能改库（无审计、易错） |
-| 2 | 会员列读数错误 | `flow_router.py:1772-1786` 用 `status='active'` + `current_period_end` | 一次性时长包用户 `current_period_end` 停留在购买时刻（`billing/service.py:753-754`），页面显示「有效 至 过去时间」；已过期未回收的 active 行仍显示「有效」 |
+| 1 | 没有任何会员写接口 | 原有用户列表、资料修改和调金币接口现分别位于 `account/admin_router.py` 和 `wallet/admin_router.py` | 客服无法补偿会员，只能改库（无审计、易错） |
+| 2 | 会员列读数错误 | 用户列表原先用 `status='active'` + `current_period_end`。列表现位于 `account/admin_router.py` 的 `list_users` | 一次性时长包用户 `current_period_end` 停留在购买时刻（`billing/service.py` 的 `_activate_pass`），页面显示「有效 至 过去时间」。已过期未回收的 active 行仍显示「有效」 |
 | 3 | 分不清钱从哪来 | 同上 | 客服不敢动，怕误伤真实付费用户 |
 | 4 | 取消要动 Stripe | `billing/service.py:326` `cancel_subscription` | 本地置 `canceled` 不停止 Stripe 扣费 → 「收了钱不给权益」 |
 | 5 | C 端禁取消一次性包 | `billing/service.py:333-334` 抛 400 | 后台收回必须走 force 路径，不能复用 C 端函数 |
@@ -142,7 +142,7 @@ AuditLog(action='membership_revoke', payload={mode, before_until, after_until, s
 
 ## 5. 必须先修的读数 bug（P0，10 行内）
 
-`list_users`（`flow_router.py:1772-1786`）改为复用 `active_membership(db, row.id)`，并补 `canceling` / `billing_mode`：
+`account/admin_router.py` 的 `list_users` 改为复用 `active_membership(db, row.id)`，并补 `canceling` / `billing_mode`：
 
 ```python
 membership = active_membership(db, row.id)
@@ -196,7 +196,7 @@ membership = active_membership(db, row.id)
 
 | 项 | 落点 |
 |---|---|
-| 列表读数修正 | `ops/flow_router.py` `list_users` 改用 `billing.active_membership()`，新增 `canceling` / `billing_mode` |
+| 列表读数修正 | `account/admin_router.py` 的 `list_users` 改用 `active_membership()`，新增 `canceling` / `billing_mode` |
 | 会员逻辑 | `billing/service.py`：`membership_detail` / `grant_membership` / `revoke_membership` |
 | 接口 | `GET/POST/DELETE /admin/v1/users/{user_id}/membership`（读 `require_admin`，写 `require_admin_role`） |
 | 前端 | `admin/src/pages/StagePages.tsx`：`MembershipModal` + 会员列三态 + 操作列第三项 |

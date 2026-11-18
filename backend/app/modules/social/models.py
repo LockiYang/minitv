@@ -6,15 +6,18 @@ import datetime
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     DateTime,
     Float,
     ForeignKey,
+    Integer,
     SmallInteger,
     String,
     Text,
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -91,4 +94,31 @@ class PushRecord(Base):
     delivered_count: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     sent_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class ModerationSettings(Base):
+    """Single-row config for OpenAI-backed comment pre-moderation.
+
+    Everything operations tune (model, prompt, thresholds, fallback) lives here.
+    ``api_key_secret`` is the Fernet-encrypted credential edited from the admin
+    page; when it is empty the key falls back to ``OPENAI_API_KEY``.
+    """
+
+    __tablename__ = "moderation_settings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    base_url: Mapped[str] = mapped_column(String(200), nullable=False, default="https://api.openai.com/v1")
+    model: Mapped[str] = mapped_column(String(64), nullable=False, default="gpt-4o-mini")
+    categories: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    system_prompt: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    approve_threshold: Mapped[float] = mapped_column(Float, nullable=False, default=0.75)
+    block_threshold: Mapped[float] = mapped_column(Float, nullable=False, default=0.75)
+    fallback_action: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
+    timeout_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=6)
+    api_key_secret: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    updated_by: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )

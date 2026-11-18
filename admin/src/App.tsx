@@ -62,45 +62,89 @@ const SIDER_WIDTH = 208;
  *  stops squeezing the page on tablets and phones. */
 const DESKTOP_QUERY = "(min-width: 992px)";
 
-const ITEMS: { key: string; label: string; roles?: string[] }[] = [
+type NavPage = { key: string; label: string; roles: Me["role"][] };
+type NavGroup = { key: string; label: string; children: NavPage[] };
+
+const ITEMS: (NavPage | NavGroup)[] = [
   { key: "/dashboard", label: "数据看板", roles: ["ops", "finance", "admin"] },
-  { key: "/dramas", label: "剧集管理", roles: ["ops", "admin"] },
-  { key: "/reviews", label: "待审核", roles: ["ops", "admin"] },
-  { key: "/groups", label: "首页分组", roles: ["ops", "admin"] },
-  { key: "/users", label: "用户管理", roles: ["finance", "admin"] },
-  // 运营中心（推送记录）暂不开放：当前只是台账占位，没有真实推送通道，先隐藏入口。
-  // 恢复时把下面一行和 /ops 路由一起放回来即可。
-  // { key: "/ops", label: "运营中心" },
-  { key: "/home-ops", label: "首页运营", roles: ["ops", "admin"] },
-  { key: "/rewards", label: "金币与任务", roles: ["ops", "admin"] },
-  { key: "/comments", label: "评论审核", roles: ["ops", "admin"] },
-  { key: "/moderation", label: "自动审核", roles: ["ops", "admin"] },
-  { key: "/finance", label: "财务订单", roles: ["finance", "admin"] },
-  { key: "/settlements", label: "结算单", roles: ["finance", "admin"] },
-  { key: "/plans", label: "会员套餐", roles: ["finance", "admin"] },
-  { key: "/tags", label: "标签库", roles: ["ops", "admin"] },
-  // 员工账号只对管理员开放：运营/财务看到入口也只会拿到 403。
-  { key: "/staff", label: "账号管理", roles: ["admin"] },
-  // 密钥签发是超管动作，与账号管理同级。
-  { key: "/api-keys", label: "API 密钥", roles: ["admin"] },
-  { key: "/suppliers", label: "上剧方管理", roles: ["admin"] },
-  // 上剧方（partner）只看到自己的剧集；其它入口一律不渲染。
+  {
+    key: "group:content",
+    label: "内容",
+    children: [
+      { key: "/dramas", label: "剧集管理", roles: ["ops", "admin"] },
+      { key: "/reviews", label: "待审核", roles: ["ops", "admin"] },
+      { key: "/groups", label: "首页分组", roles: ["ops", "admin"] },
+      { key: "/home-ops", label: "首页运营", roles: ["ops", "admin"] },
+      { key: "/tags", label: "标签库", roles: ["ops", "admin"] },
+    ],
+  },
+  {
+    key: "group:community",
+    label: "社区",
+    children: [
+      { key: "/comments", label: "评论审核", roles: ["ops", "admin"] },
+      { key: "/moderation", label: "自动审核", roles: ["ops", "admin"] },
+    ],
+  },
+  {
+    key: "group:users",
+    label: "用户与金币",
+    children: [
+      { key: "/users", label: "用户管理", roles: ["finance", "admin"] },
+      { key: "/rewards", label: "金币与任务", roles: ["ops", "admin"] },
+    ],
+  },
+  {
+    key: "group:commerce",
+    label: "商业化",
+    children: [
+      { key: "/plans", label: "会员套餐", roles: ["finance", "admin"] },
+      { key: "/finance", label: "财务订单", roles: ["finance", "admin"] },
+    ],
+  },
+  {
+    key: "group:partners",
+    label: "合作方",
+    children: [
+      { key: "/suppliers", label: "上剧方管理", roles: ["admin"] },
+      { key: "/settlements", label: "结算单", roles: ["finance", "admin"] },
+    ],
+  },
+  {
+    key: "group:system",
+    label: "系统",
+    children: [
+      { key: "/staff", label: "账号管理", roles: ["admin"] },
+      { key: "/api-keys", label: "API 密钥", roles: ["admin"] },
+    ],
+  },
   { key: "/partner/dramas", label: "我的剧集", roles: ["partner"] },
   { key: "/partner/stats", label: "数据中心", roles: ["partner"] },
   { key: "/partner/settlements", label: "结算单", roles: ["partner"] },
   { key: "/partner/api-keys", label: "API 密钥", roles: ["partner"] },
 ];
 
+const NAV_PAGES = ITEMS.flatMap<{ key: string; label: string; parentKey?: string }>((item) =>
+  "children" in item
+    ? item.children.map(({ key, label }) => ({ key, label, parentKey: item.key }))
+    : [{ key: item.key, label: item.label }]
+).sort((a, b) => b.key.length - a.key.length);
+
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const token = getToken();
+  const selectedItem = NAV_PAGES.find(
+    ({ key }) => location.pathname === key || location.pathname.startsWith(`${key}/`)
+  );
+  const selectedGroup = selectedItem?.parentKey;
   const [me, setMe] = useState<Me | null>(null);
   // 页面必须等身份确认后再渲染：上剧方账号一旦先落到员工页（旧书签、直接
   // 输 URL、登录后默认跳转），每个请求都会吃 403「接口仅对平台员工开放」，
   // 用户看到的是「数据全空 + 一排红条」，却不会被送回登录页。
   const [meState, setMeState] = useState<"loading" | "ready" | "failed">(token ? "loading" : "ready");
   const [navOpen, setNavOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState(selectedGroup);
   // Desktop sidebar can be folded away so wide tables get the whole viewport.
   const [siderCollapsed, setSiderCollapsed] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -154,7 +198,8 @@ export default function App() {
 
   useEffect(() => {
     setNavOpen(false);
-  }, [location.pathname]);
+    setOpenGroup(selectedGroup);
+  }, [location.pathname, selectedGroup]);
 
   /**
    * 退出登录：先让服务端销毁 Redis 会话，再清本地 token。
@@ -273,17 +318,15 @@ export default function App() {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const selectedItem = [...ITEMS]
-    .sort((a, b) => b.key.length - a.key.length)
-    .find((item) => location.pathname === item.key || location.pathname.startsWith(`${item.key}/`));
   const selected = selectedItem?.key ?? "/dramas";
   const pageTitle = selectedItem?.label ?? "剧集管理";
 
-  // Role-gated entries stay hidden until `/auth/me` resolves, so a non-admin
-  // never sees a menu item that would only 403. Unrestricted items pass through.
-  const visibleItems = ITEMS.filter(
-    (item) => !item.roles || (me !== null && item.roles.includes(me.role))
-  );
+  const canSeePage = (page: NavPage) => me !== null && page.roles.includes(me.role);
+  const visibleItems = ITEMS.flatMap<NavPage | NavGroup>((item) => {
+    if (!("children" in item)) return canSeePage(item) ? [item] : [];
+    const children = item.children.filter(canSeePage);
+    return children.length > 0 ? [{ ...item, children }] : [];
+  });
 
   const nav = (
     <>
@@ -298,6 +341,8 @@ export default function App() {
         mode="inline"
         style={{ borderInlineEnd: "none" }}
         selectedKeys={[selected]}
+        openKeys={openGroup ? [openGroup] : []}
+        onOpenChange={(keys) => setOpenGroup(keys.find((key) => key !== openGroup))}
         items={visibleItems}
         onClick={({ key }) => {
           navigate(key);

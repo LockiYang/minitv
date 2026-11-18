@@ -18,7 +18,7 @@
 2. `backend/app/modules/content/upload_service.py`（后台直传回调）
    - `apply_callback(outcome="finished")` 在 real 模式下读一次 Bunny 元数据，把 `length`
      写入 `duration_seconds`（best-effort，Bunny 抖动不会让回调失败）。
-3. `backend/app/modules/ops/flow_router.py`（后台「同步」按钮）
+3. 后台「同步」接口现位于 `backend/app/modules/content/media_admin_router.py` 的 `sync_episode_status`。
    - `POST /admin/v1/episodes/{id}/sync-status` 在轮询时同时回填 `length`，
      响应新增 `duration_seconds`。
 

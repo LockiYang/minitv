@@ -8,45 +8,17 @@ be able to mint one for itself.
 
 from __future__ import annotations
 
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.modules.ops import api_keys as service
-from app.modules.ops.models import STATUS_ACTIVE, AdminApiKey, AdminUser, ApiKeyEvent
-from app.modules.ops.router import require_admin, require_admin_role
+from app.modules.ops.auth import require_admin, require_admin_role
+from app.modules.ops.models import AdminApiKey, AdminUser, ApiKeyEvent
+from app.modules.ops.schemas import KeyCreateIn, KeyUpdateIn, RevokeIn, RotateIn
 
-router = APIRouter(prefix="/admin/v1", tags=["admin-api-keys"])
-
-
-# ---- schemas ----
-
-
-class KeyCreateIn(BaseModel):
-    user_id: int
-    name: str = Field(min_length=1, max_length=64)
-    scopes: list[str] | None = None
-    # ``None`` explicitly means "never expires" and is admin-only by design
-    # (the endpoint itself is admin-only).
-    expires_in_days: int | None = Field(default=service.DEFAULT_TTL_DAYS)
-
-
-class KeyUpdateIn(BaseModel):
-    name: str | None = Field(default=None, min_length=1, max_length=64)
-    scopes: list[str] | None = None
-    expires_at: datetime | None = None
-
-
-class RevokeIn(BaseModel):
-    reason: str | None = Field(default=None, max_length=200)
-
-
-class RotateIn(BaseModel):
-    expires_in_days: int | None = Field(default=service.DEFAULT_TTL_DAYS)
+router = APIRouter(tags=["admin-api-keys"])
 
 
 # ---- serialisation ----
